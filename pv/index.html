@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>微分几何 · Differential Geometry — PV</title>
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="./node_modules/katex/dist/katex.min.css">
+<link rel="stylesheet" href="./node_modules/@fontsource/noto-serif-sc/400.css">
+<link rel="stylesheet" href="./node_modules/@fontsource/noto-serif-sc/600.css">
+<link rel="stylesheet" href="./node_modules/@fontsource/noto-serif-sc/700.css">
+<link rel="stylesheet" href="./node_modules/@fontsource/noto-serif-sc/900.css">
+<link rel="stylesheet" href="./node_modules/@fontsource/cormorant-garamond/400.css">
+<link rel="stylesheet" href="./node_modules/@fontsource/cormorant-garamond/400-italic.css">
+<link rel="stylesheet" href="./node_modules/@fontsource/cormorant-garamond/600.css">
+<link rel="stylesheet" href="./node_modules/@fontsource/cormorant-garamond/600-italic.css">
+<link rel="stylesheet" href="./node_modules/@fontsource/jetbrains-mono/400.css">
+<link rel="stylesheet" href="./node_modules/@fontsource/jetbrains-mono/700.css">
+<link rel="stylesheet" href="./node_modules/@fontsource/inter/400.css">
+<link rel="stylesheet" href="./node_modules/@fontsource/inter/600.css">
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden;color:#f4f8ff;font-family:'Noto Serif SC',serif}
+  #stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;background:#02030a}
+  #gl{width:100%;height:100%;display:block}
+  #overlay{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;pointer-events:none;overflow:hidden}
+  #hud{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:visible}
+  #texts{position:absolute;left:0;top:0;width:1920px;height:1080px}
+  .ui-el{position:absolute;left:0;top:0;display:none;white-space:normal;will-change:transform,opacity}
+  .ui-tex .katex{font-size:1em}
+  #cover{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;background:radial-gradient(ellipse at 50% 40%,#0b1436 0%,#02030a 70%);z-index:50;transition:opacity .8s}
+  #cover h1{margin:0;font-weight:900;font-size:min(9vw,120px);letter-spacing:.12em;text-shadow:0 0 40px #5ee7ff88}
+  #cover p{margin:0;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:min(3vw,30px);letter-spacing:.3em;opacity:.75}
+  #cover button{font:600 20px 'Inter',sans-serif;letter-spacing:.2em;color:#02030a;background:#5ee7ff;border:0;border-radius:40px;padding:16px 44px;cursor:pointer;box-shadow:0 0 40px #5ee7ff88}
+  #cover button:disabled{opacity:.5;cursor:wait}
+  #cover small{font:400 13px 'JetBrains Mono',monospace;opacity:.5;letter-spacing:.15em}
+  #bar{position:absolute;left:0;bottom:0;height:3px;background:#5ee7ff;width:0;z-index:40;box-shadow:0 0 12px #5ee7ff}
+</style>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/","katex":"./node_modules/katex/dist/katex.mjs"}}</script>
+</head>
+<body>
+<div id="stage"><canvas id="gl"></canvas><div id="overlay"><svg id="hud" viewBox="0 0 1920 1080"></svg><div id="texts"></div></div></div>
+<div id="cover" style="display:none"><h1>微分几何</h1><p>DIFFERENTIAL GEOMETRY</p><button id="play" disabled>加载中…</button><small id="hint">SPACE 暂停 · ←/→ 快进退 · F 全屏 · R 重播</small></div>
+<div id="bar"></div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
