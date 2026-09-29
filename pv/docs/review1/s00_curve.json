@@ -1,0 +1,35 @@
+{
+ "id": "s00_curve",
+ "finalScores": {
+  "impact": 4,
+  "clarity": 4,
+  "typography": 3,
+  "motion": 4,
+  "look": 4,
+  "technical": 4,
+  "math": 5
+ },
+ "finalPass": false,
+ "remainingBlockingDefects": [
+  {
+   "severity": "major",
+   "at": "1.4-4.9 (n/a), 6.9-10.3 (caption c2 zh+en); also HUD readout",
+   "problem": "The Greek letters κ and τ in caption 2 come out in a bold/italic DejaVu Serif face that reads as a capital K and a capital T. At 1080p in the English line it looks like 'Curvature K and torsion T'. Chapter 3 uses K for Gaussian curvature, so the film's first script line teaches a wrong or confusing symbol. In the Chinese line the κ also looks like an italic K.",
+   "fix": "Change the GR() helper. Drop font-weight inheritance (set font-weight:400 explicitly; the caption's weight 600 and the English weight 500 are leaking in). Use a face with a distinctive lowercase κ, such as Cormorant Garamond italic or Noto Serif italic. Make font-size 1.15-1.2em. In the English line use a lighter colour or a small letter-spacing so κ/τ do not read as K/T. Check at 1080p that κ has the open, detached arms of a lowercase kappa."
+  }
+ ],
+ "authorKnownIssues": [
+  "shot.mjs reports 14-25 ms per steady-state frame at 960x540 and 250-600 ms on frames that first compile shaders or KaTeX. It may not include the full GPU time, so real software-GL cost could be higher.",
+  "qa.mjs flags the hero frame at t=6.0 as a luminance jump (mean luma ~20 -> ~105) and motion spike. This is the intended hit, and it lasts about 2 frames. Its peak has a slightly grey veil from bloom and flash, which I reduced but did not remove.",
+  "The osculating circle occasionally passes behind the HUD readout and the caption. The rings and floor grid can cross the caption.",
+  "The kit.chapterTitle 'spread' reveal makes the first glyph look striped for a few frames, and the mono HUD at the left is small (21-30 px) but legible at 1080p.",
+  "The gold hero ring plus a cyan ring sweep across the title area at 6.1-6.9 with slight CA fringing. Repeated renders differ by up to 2/765 in the UI text region only (font raster noise).",
+  "The echo curves are faint and read mostly as thin arcs. The polar-grid floor is fairly prominent, which reduces negative space in the middle frames.",
+  "The scene ends with the knot centred, not carrying the right-shift used under the title. That is intended for the zoom transition into chapter 02."
+ ],
+ "engineRequests": [
+  "Optional: expose a frame or seed index to ctx so grain and UI text raster can be bit-identical between renders.",
+  "kit.arrow allocates new geometry on every set() call and never disposes the old buffers. A dynamic-buffer variant would be safer for long renders."
+ ],
+ "perfMs": 25
+}

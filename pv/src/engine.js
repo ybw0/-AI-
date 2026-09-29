@@ -11,6 +11,19 @@ import { UI } from './ui.js';
 import { rng, smoothstep, clamp, lerp, palette, seg } from './util.js';
 import * as TL from './timeline.js';
 
+// Reuse GPU buffers when a fat line is re-posed with the same point count (scenes call geometry.setPositions every frame).
+// Without this every call allocates fresh buffers; thousands of frames would leak GPU memory in the offline renderer.
+{
+  const orig = LineSegmentsGeometry.prototype.setPositions;
+  LineSegmentsGeometry.prototype.setPositions = function (array) {
+    const a = this.attributes.instanceStart;
+    if (a && a.data.array.length === array.length) {
+      a.data.array.set(array); a.data.needsUpdate = true; this.instanceCount = a.count; return this;
+    }
+    return orig.call(this, array);
+  };
+}
+
 const CLEAR = new THREE.Color(palette.void);
 
 const flat = (pts) => {

@@ -54,7 +54,8 @@ post (per-frame mutable post params), ui (overlay API), rng(seed), background(he
   `fatLine({intensity: 2..3})`. `new THREE.Color(hex)` converts sRGB hex → linear for you. Custom `ShaderMaterial`: output linear colour, **no tonemapping,
   no gamma** — `gl_FragColor = vec4(col, alpha)`.
 * Post params you may set per frame (reset to defaults every frame, so set them every frame): `ctx.post.{exposure, bloom, bloomThreshold, bloomScatter, streak, streakColor[3], contrast, saturation, tint[3], vignette, ca, grain, flash}`.
-  `flash` adds HDR white (use 0.3–2.0 for 3–6 frame hits). Keep `bloom` 0.4–1.2 normally, up to 2.5 for hero pulses.
+  **`flash` (REVISED after round 1)**: now a proper cinematic hit = bloom swell + exposure surge, so bright objects blow out into glowing white while dark space stays dark (no more grey fog). Values: **0.1–0.3 punchy hit, 0.5–0.8 heavy, ≥0.9 pure white** (needs ~3–8 frames of falloff, e.g. `0.7*Math.exp(-(t-HERO)/0.08)`). A hero moment should use this: earlier scenes kept it ~0 because the old flat-add flash looked like fog — that limitation is gone, so **raise hero flash to a real hit (≈0.4–0.8 for 2–4 frames) where the storyboard calls for a big moment**, but check the frame at full-res: it must look radiant, never grey. Keep `bloom` 0.4–1.2 normally, up to 2.5 for hero pulses.
+  Greek letters/maths inside `ui.text` html: use `kit.math('\\kappa')` (inline KaTeX) — never hand-style κ τ in a sans/italic system face (reads as K/T).
 * Premium look = **dark background + a few luminous elements + soft depth**. Avoid flat large bright areas. Use `kit.backdrop` and `kit.starfield` (subtle) or a
   pure gradient; vary composition between scenes but keep the family look (palette below).
 * **Lines**: `THREE.Line` is 1 px and looks cheap — use `ctx.fatLine` / `ctx.fatSegments` (screen-space width in 1080p px, additive glow by default).

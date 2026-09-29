@@ -189,7 +189,7 @@ function chapterTitle(ui, t, { at, hold, zh, en, kicker, x, y, size, key }) {
   return v;
 }
 /** Greek letter in an explicit serif italic face (the CJK / display fonts fall back to a small bold Latin-looking glyph). */
-const GR = (ch) => `<span style="font-family:'DejaVu Serif','Noto Serif SC',serif;font-style:italic;font-weight:400;font-size:1.08em;letter-spacing:0;padding:0 0.06em">${ch}</span>`;
+const GR = (ch) => `<span style="padding:0 0.05em">${kit.math(ch === 'κ' ? '\\kappa' : ch === 'τ' ? '\\tau' : ch)}</span>`;
 /** Bottom-centre narration: Chinese line + a larger, fully opaque English line (kit.caption's 0.46x/0.85 is too faint at 1080p). */
 function caption(ui, t, { at, dur, zh, en, key, y = 925, size = 50, track = 0.14 }) {
   const v = pulse(t, at, at + dur, 0.55, 0.55);
@@ -538,7 +538,7 @@ export default {
       ui.text('ghd', `<span style="color:#5ee7ff">κ ${sg(fr.kappa).replace('+', ' ')}</span>&nbsp;&nbsp;<span style="color:#ff4fd8">τ ${sg(fr.tau)}</span>`, { x: gx, y: gy - 92, anchor: 'tl', size: 30, font: 'mono', opacity: hud, track: 0.04 });
       ui.text('ghd2', `<span style="color:#9fc4ff">s = ${(clamp(sRaw) * this.L).toFixed(2)} / ${this.L.toFixed(2)} &nbsp;&nbsp; 1/κ = ${(1 / fr.kappa).toFixed(2)}</span>`, { x: gx, y: gy - 50, anchor: 'tl', size: 24, font: 'mono', opacity: hud * 0.9, track: 0.03 });
       // axis legend: curve names at the start of each graph line, x axis label under the axis
-      const lg = (ch, col) => `<span style="color:${col};font-family:'DejaVu Serif','Noto Serif SC',serif;font-style:italic">${ch}</span><span style="color:${col};font-family:'Cormorant Garamond',serif;font-style:italic">(s)</span>`;
+      const lg = (ch, col) => `<span style="color:${col}">${kit.math(ch === 'κ' ? '\\kappa' : ch === 'τ' ? '\\tau' : ch)}</span><span style="color:${col};font-family:'Cormorant Garamond',serif;font-style:italic">(s)</span>`;
       ui.text('glk', lg('κ', '#5ee7ff'), { x: gx + gw + 14, y: Y(this.kap[0]), anchor: 'cl', size: 26, opacity: hud * 0.9 });
       ui.text('glt', lg('τ', '#ff4fd8'), { x: gx + gw + 14, y: Y(this.tau[0]), anchor: 'cl', size: 26, opacity: hud * 0.9 });
     }

@@ -1,0 +1,49 @@
+{
+ "id": "s04_gaussbonnet",
+ "finalScores": {
+  "impact": 3,
+  "clarity": 4,
+  "typography": 3,
+  "motion": 4,
+  "look": 4,
+  "technical": 4,
+  "math": 5
+ },
+ "finalPass": false,
+ "remainingBlockingDefects": [
+  {
+   "severity": "major",
+   "at": "4.85-5.06",
+   "problem": "The hero white-out is a muddy grey-lavender fog (mean luma 218, not radiant white), with visible grain/pastel posterisation. The formula is blurred and low-contrast for the 2-3 frames it sits on this fog. The frame then snaps 218 -> 41 luma between 5.0 and 5.12 (QA motion-spike 127/177 vs median 6, luminance-jump). So the hit that carries the whole scene reads as a dirty flash cut rather than an ignition.",
+   "fix": "In post/hero(): raise the flash peak toward clean white and stop the grey wash. Drive post.flash (currently 0.28*pre^2 + 0.28*boom) to about 1.2-1.6 over 3-4 frames, and lower post.contrast and post.saturation so it does not desaturate to grey. Add a 2-frame ease-out (boom tau about 0.08 with a smoothstep tail) instead of the hard swap. Reveal the formula from the bright core outward, letting the tex opacity ramp begin at T_HERO+0.03 with blur 0 at the peak."
+  },
+  {
+   "severity": "major",
+   "at": "5.1-5.6",
+   "problem": "The hero payoff is thin. After the white-out the theorem is plain white/gold/cyan text over sparse, thin, low-contrast speed lines and a faint floor. The luminance drops to about 13-17 for 0.5 s (min 12.9 at about 5.5). There is no luminous object, so the biggest moment lacks awe. The two shock rings are thin grey circles that cut straight through the ∮ and k_g glyphs at 5.1-5.3.",
+   "fix": "Add real HDR emissive structure at T_HERO: a bright core sprite or ring behind the formula, and more and brighter tunnel segments (raise the fatSegments intensity from 0.4 to 1.2+ and the count from 260 to 500+). Keep the post.bloom tail above 0.9 until about 5.8. Draw the rings behind the ui.tex (z order) or offset them so they do not strike through glyphs. Fade the ring opacity from 0.85 to 0.4."
+  },
+  {
+   "severity": "major",
+   "at": "8.4-10.5 (worst 9.3-10.4)",
+   "problem": "The Act II readout blocks and the Chinese caption are stacked with almost no gap. The three-line labels end at y about 870 (∬K dA = 0 / 4π / -4π) and the caption's glyph tops start at about 885, so they nearly touch. During the closing pulse (scale 1.07 plus glow radius 30) they collide. There are also more than three text groups on screen (eyebrow, formula, note line, 3 labels, 2-line caption), against the max-three rule. The frame is cramped at the bottom and empty in the middle band (at t=6 the objects are small and clustered low).",
+   "fix": "Move the ob{i} label y from 744 to about 700, or shrink the objects and raise the camera target so the labels sit around y 690-810. Or move caption c2 y from 936 to about 960 and drop the English line. Limit the fin pop to scale 1.04 and remove the extra glow. Drop the '∂M = ∅ ⇒ ∮k_g ds = 0' note (var bt, 'gbn') when the labels are up. Enlarge the objects at t<7 by reducing the initial radius r (12.4+36*(1-tp) -> 11+30*(1-tp))."
+  }
+ ],
+ "authorKnownIssues": [
+  "Perf: steady-state frames render at roughly 10-100 ms at 960x540. A first-of-run frame on Act II costs about 800 ms because of shader compile, and t=3.3 measured about 380 ms once. Init takes roughly 1 s (marching tetrahedra plus the geodesic shooting).",
+  "The hero is a deliberate white-out: qa.mjs flags blown-out, luminance-jump and motion-spike at t=4.88-5.25 (about 8 frames of near-white).",
+  "The double torus reads smaller and thinner than the sphere and torus. It oscillates ±0.38 rad about Y to avoid edge-on views and is scaled to fit the frame width.",
+  "The double-torus integral is a mesh quadrature (about −12.60 vs −12.566, 0.3 % error), so the label uses ≈ with one decimal.",
+  "A near-transparent SVG element with a drop-shadow filter renders as a black slab in headless Chrome. I hit this on the shock rings, worked around it by fading them to exactly 0 early, and did not touch shared code. Other scenes should avoid nearly-transparent glowing ui.circle/ui.path elements.",
+  "Act I is text-dense at 3-4.7 s (title, caption, 9 angle labels, 3 sum blocks). The caption sits about 25 px below the sum blocks at 1080p; tight but not overlapping.",
+  "The tunnel and the pre-flash glow are camera-relative fake effects, and the two acts live in separate scene groups that are cut on the white flash.",
+  "There is a small LSB-level nondeterminism between two renders of the same frame (max diff 2/765 in a few pixels)."
+ ],
+ "engineRequests": [
+  "ui.js: a near-transparent SVG shape with a glow (drop-shadow) filter renders as an opaque black slab in headless Chrome. Hide shapes below an opacity of about 0.05 or skip the filter.",
+  "ui.tex: the mask reveal clips the text-shadow glow into a visible rectangle; a fade or blur reveal mode for tex would avoid it.",
+  "kit.surfaceMaterial relies on gl_FrontFacing for the normal flip, so meshes with inconsistent winding (marching cubes) shade wrongly. A note or a doubleSided-normal option would help."
+ ],
+ "perfMs": 60
+}

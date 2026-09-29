@@ -1,0 +1,50 @@
+{
+ "id": "s05_spacetime",
+ "finalScores": {
+  "impact": 4,
+  "clarity": 4,
+  "typography": 4,
+  "motion": 3,
+  "look": 4,
+  "technical": 4,
+  "math": 5
+ },
+ "finalPass": false,
+ "remainingBlockingDefects": [
+  {
+   "severity": "major",
+   "at": "6.0 (single frame; neighbours 5.967 and 6.033)",
+   "problem": "The hero frame is a flat, desaturated light grey (mean luma about 209, roughly #d0d0d0) that washes out the disk and the ring. It lasts exactly one frame at 30 fps, so it reads as a strobe or a render glitch, not a hot white-out. QA flags it as luminance-jump 67→209.6→52.2 and two motion-spikes (diff 143 and 158 against a median of 22 at 6.0 and 6.12). Grey is the tell that a fixed additive flash is being tone-mapped and bloomed into a veil.",
+   "fix": "Replace the 1-frame grey flash with a 4 to 6 frame envelope (about 0.15 to 0.2 s) that decays quickly: ctx.post.flash = ~0.9·exp(−(t−6.0)/0.06) for t≥6.0, with a short 2-frame ramp before it (about 5.93 to 6.0). Give it a warm-white tint through the highlights (a larger streak plus the burst sprite) instead of a uniform additive veil. This lowers the peak luma, or at least makes it read as a bloom-flare over a visible black hole. Also stop the exposure from lifting the whole frame: ctx.post.exposure += 0.1·hit, and heroGlow contributes to the disk only."
+  },
+  {
+   "severity": "major",
+   "at": "5.90–6.10, worst at 5.967 and 6.033",
+   "problem": "The funnel-to-black-hole handover is a 3 to 4 frame crossfade (heroK = smoothstep(5.90, 6.08)) in which the blue grid, the dying star and the already-opaque orange disk overlap. At 5.967 the star ball sits inside the shadow with grid lines running through the disk. The 'reveal' therefore looks like a dissolve, not a decisive event, and the grey flash hides it only by accident.",
+   "fix": "Make the swap coincide with the flash peak instead of being visible: heroK = step-like smoothstep(5.995, 6.005, t) and this.lens.visible = t > 5.99. Fade the funnel, trails, orbs and mask out over 5.85 to 5.99 (uFade 1−smoothstep(5.85, 5.99)). Also keep the star sphere from visibly sitting inside the shadow during the first frames (see the next defect)."
+  },
+  {
+   "severity": "major",
+   "at": "6.03–6.5",
+   "problem": "The black hole shadow is not black. From 6.03 to about 6.5 the interior of the shadow is a brown or amber disc with a small white ring in its centre (a leftover starGlow/burst sprite and the additive glowIn term), so the hole looks like a filled orange ball, not a void. The photon ring is drawn as a thin, perfectly circular white line with a second concentric ring that looks like a graphic overlay. This weakens the 'wow' of the hero.",
+   "fix": "Hide the burst, starGlow and starGlow2 sprites fully by t=6.0 (starVis and burst visible only for t<6.0, and bw should not overlap lens pixels). Force the captured-ray colour to ≈0 by reducing glowIn (0.05 → 0.0) at t>6.0 and by fading L.uRingI in from 0.0 over 6.0 to 6.3. Also use the ring shader (ringC) at lower intensity (uRingI 0.42→0.3) and add a soft blur of about 0.03 to the ring so it reads as light, not a stroke. Fade the spacetime-ripple ring (uWave) by 6.6 so it doesn't add a second concentric circle beside the Einstein ring at 6.5."
+  }
+ ],
+ "authorKnownIssues": [
+  "Frame exactly at t=6.0 is a deliberate near-pure-white flash frame (one frame; neighbours 5.97/6.03 show a bright radial blaze). A still grabbed at exactly 6.0 shows almost nothing; the best hero stills are about 6.3-6.6 and 9.",
+  "Funnel to black hole is a designed cut under the flash/starburst (two different renderers), not a continuous morph. tools/qa.mjs flags that cut as a motion spike and a luminance jump at 6.0 and 6.12-6.17; it is intentional. The funnel is hidden for t > 6.3.",
+  "Face-on lens frames (6.1-6.4) read as a fairly blobby orange donut with a bright ring. The iconic tilted silhouette arrives about 0.8 s later (about 6.8-7.0).",
+  "Light rays in the funnel are thin and fairly faint, and from the near-top-down camera late in the dive they read as fine wires down the funnel wall. Their bending is only clearly visible in the oblique 3.5-5 s shots.",
+  "A faint pale ghost of the star's lower half is visible beneath the throat in the oblique shots.",
+  "Rendering is not bit-identical between runs: two renders of the same frame differ by at most 1 LSB on a few pixels (mean diff about 2e-4). _kit is bit-identical. Cause not found; no random or time APIs are used.",
+  "Perf is about 200 ms/frame at 960x540 for both phases under machine load, versus about 145 ms for the _kit reference (shot.mjs 'render ms' is misleading because of async GPU). 1080p frames take about 0.8-1.3 s. The lens table bake in init is about 40 ms; the whole init is a few hundred ms.",
+  "Physical simplifications: the lens uses a fixed observer at 14 rs (zoom is a screen scale, not a moving observer). The disk is a thin, opaque, Keplerian-tinted emitter with hand-tuned colours, not a radiative-transfer model. The star field is procedural and stretches into arcs near the ring.",
+  "The grid at 2.7-4.5 s is busy behind the title, caption and HUD. Legibility is fine at 1080p thanks to glows and the dark HUD panel, but the English italic line sometimes crosses orbit lines."
+ ],
+ "engineRequests": [
+  "A post.flash that supports a radial or masked profile; a uniform additive white flash reads as a grey veil on dark frames, so it was replaced by an in-scene sprite blaze plus a single-frame flash.",
+  "Expose the render-target fence in shot.mjs so 'render ms' reflects real GPU time.",
+  "Optional built-in fullscreen-quad helper (camera-independent) and a premultiplied-alpha blend preset."
+ ],
+ "perfMs": 200
+}

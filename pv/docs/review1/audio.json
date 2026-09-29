@@ -1,0 +1,43 @@
+{
+ "failed": false,
+ "rounds": [
+  {
+   "round": 1,
+   "pass": false,
+   "blocking": 1
+  },
+  {
+   "round": 2,
+   "pass": true,
+   "blocking": 0
+  }
+ ],
+ "author": {
+  "peak": -1.06,
+  "rms": -15.5,
+  "heroLifts": "Hero anchors in anchor_hits (lift_db): s00@6 +7.6, s01@15 +8.9, s02@26 +7.8, s03@37 +9.1, s04@47 +10.6, s05@58 +6.2, s06@66 +8.5, s07@73 +8.2. The s02 climax at 30 s is +5.6. Scene-start lifts are small or negative on purpose (10 s +0.2, 32 s -4.5, 62 s -9.5) because the pre-hero dips and the dip to black make the \"before\" window loud or silent.",
+  "knownIssues": [
+   "Never auditioned. Timbre, mix balance, taste and melodic quality are unverified by ear; choices come from theory and spectrogram/band-energy measurement only.",
+   "Not bit-exact between runs. The seeded PRNG and event order are deterministic, but two renders of the same file differ by at most 1 LSB of the 16-bit WAV in under 1% of samples (float error about 2e-6). The likely cause is Chromium summing many voices into one bus in an order that changes between runs. I did not fully isolate it, and small isolated graphs were bit-identical.",
+   "Low-end heavy. Sub, bass and kick sit about 6 to 10 dB above the mids in band energy, after I had already cut them by about 8 dB. Laptop speakers will hear it as thin or mid-forward, and the RMS metric flatters the bass.",
+   "The quietest chapter is about -21.5 dB median (s06), with its quietest seconds at -25 to -26. That is louder than the brief's ~-24. s00 medians -22.",
+   "s07 resolution (80 to 82 s) is still fairly full (-13 to -17 dB) for 'serene', and the reverb tail is cut by the required log-fade from 82.4 s, so the natural tail is only partly heard.",
+   "The s05 hero has the smallest lift (+6.2 dB), because the choir, riser and reverb tails keep the pre-hero window fairly loud.",
+   "The limiter is doing real work (up to -4.1 dB gain reduction at hero and anthem peaks), so the hero impacts are compressed and their punch is partly a product of the pre-hero dips and gaps.",
+   "The 1.1 s dip before each hero is a deliberate gap in the music. It may feel like a hole if the picture does not also breathe there.",
+   "Scene-start transition sounds are present but not level jumps at 10 s (+0.2 dB), 32 s (-4.5) and 42 s (+1.2), because the preceding fills and risers are as loud. They read by timbre, not by loudness.",
+   "Chords, the theme and the dust pools are hard-coded to the current timeline (bar-aligned scene starts, 120 BPM). Changing scene lengths or anchors would need the CH_TABLE beat offsets and the hero-aligned hits updated.",
+   "The live player renders in the page at 44.1 kHz, which takes roughly 20 to 40 s on a normal browser (19.5 s here). It also depends on ctx.suspend windows, which round to 128-frame quanta, so a voice could start up to ~3 ms late at 44.1 kHz (not measured)."
+  ]
+ },
+ "finalPass": true,
+ "finalScores": {
+  "arc": 4,
+  "impact": 4.5,
+  "mix": 4,
+  "harmony": 4.5,
+  "transitions": 4,
+  "technical": 4.5
+ },
+ "remainingDefects": []
+}

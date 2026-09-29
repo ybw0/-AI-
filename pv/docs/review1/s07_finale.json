@@ -1,0 +1,36 @@
+{
+ "id": "s07_finale",
+ "finalScores": {
+  "impact": 4,
+  "clarity": 4,
+  "typography": 4,
+  "motion": 4,
+  "look": 4.5,
+  "technical": 4,
+  "math": 4.5
+ },
+ "finalPass": false,
+ "remainingBlockingDefects": [
+  {
+   "severity": "major",
+   "at": "2.7-3.5",
+   "problem": "The hero frame is the weakest frame of the pre-hero build. At t=3.0, the music hit, the frame is a small 250 px flare and a horizontal streak on empty nebula. Mean luma bottoms out (about 12) at 2.7-3.0. The big visual payoff arrives late: the Klein bottle is still a small blue shell at 3.3, and the luma and frame-diff peaks are at 3.5-3.65. The picture lags the hit by 0.3-0.6 s. The flash is nearly absent: post.flash = 0.008*exp(-34 tt), and the ring and spark energy is spread over 1.5 s or more.",
+   "fix": "Put the surge on the hit. Set post.flash to about 0.5-0.8 for tt<0.12 s, then decay. Raise the tt<0.15 core, ring1 and burst energy: uCoreI, ring1 uRingI 4 -> 8, burst uAmp. Speed up the shell reveal: radv ease.outCubic(tt/1.8) -> tt/0.9, and the outBack scale of kg to about 0.8 s. Move the dip so it ends at 2.85 instead of 3.0. The frame at t=3.0 should already be bright and full of rings."
+  }
+ ],
+ "authorKnownIssues": [
+  "The exact hero frame (t=3.0) is a near-uniform grey-white flash for about 1 frame, because post.flash is a uniform add. It is brief and intentional but flat; a radial flash would be nicer.",
+  "The Klein bottle is fairly pastel and milky (peach/cyan/lavender) because glass alpha, rim and bloom stack up; gold and cyan are clearly readable but not deeply saturated.",
+  "The montage motifs are simple wireframes, so the first second is more elegant than explosive; it depends on the incoming white-flash transition for its punch.",
+  "Post 'motion-spike' flags in tools/qa.mjs at 1.5-2.2 s and 3.0 s are the intentional motif cuts and the detonation.",
+  "Perf is measured from shot.mjs ms per frame, steady state 13-30 ms at 960x540. That figure looks like an async timing; wall-clock of qa.mjs was about 0.7 s/frame at 480x270 under shared CPU load. The first frame compiles shaders (about 350 ms at 960x540). Klein is 2x48k triangles plus about 20k points, so the load is fill/shader dominated.",
+  "Orbit arcs and the large faint ring occasionally pass behind the title/tagline text (dimmed by the scrim, legible), and the gold comet crosses the Klein hole around 4.8 s.",
+  "Renders are deterministic up to +/-1 LSB float noise on a few pixels between runs in different orders."
+ ],
+ "engineRequests": [
+  "post.flash is a uniform add; a radial or centre-weighted flash option would make hero hits more elegant.",
+  "A LineMaterial option for per-line width scaling with depth (or a ribbon helper like s00's makeRibbon in a shared file) would help comet and orbit trails.",
+  "kit.backdrop's 512x256 texture shows soft blocky cloud edges when the nebula is scaled up; a higher-res or smoothed bake would help."
+ ],
+ "perfMs": 25
+}

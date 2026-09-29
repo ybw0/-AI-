@@ -20,8 +20,8 @@ function layoutLive() {
 }
 
 async function preloadFonts() {
-  const txt = '微分几何曲线面率测地时空流终章高斯博内定理欧拉示性数弯曲世界丈量不变真理0123456789';
-  const specs = ['400', '600', '700', '900'].map((w) => `${w} 40px "Noto Serif SC"`).concat(['italic 400 40px "Cormorant Garamond"', '600 40px "Cormorant Garamond"', '400 40px "JetBrains Mono"', '600 40px "Inter"']);
+  const txt = '微分几何曲线面率测地时空流终章高斯博内定理欧拉示性数弯曲世界丈量不变真理0123456789κτχ∬∮';
+  const specs = ['400', '600', '700', '900'].map((w) => `${w} 40px "Noto Serif SC"`).concat(['italic 400 40px "Cormorant Garamond"', '600 40px "Cormorant Garamond"', '400 40px "JetBrains Mono"', '600 40px "Inter"', '400 40px "Noto Serif"', '600 40px "Noto Serif"', 'italic 400 40px "Noto Serif"', 'italic 600 40px "Noto Serif"']);
   await Promise.all(specs.map((s) => document.fonts.load(s, txt).catch(() => {})));
   await document.fonts.ready;
 }

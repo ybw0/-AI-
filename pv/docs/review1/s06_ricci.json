@@ -1,0 +1,37 @@
+{
+ "id": "s06_ricci",
+ "finalScores": {
+  "impact": 4,
+  "clarity": 4,
+  "typography": 4,
+  "motion": 3,
+  "look": 3.5,
+  "technical": 4,
+  "math": 4
+ },
+ "finalPass": false,
+ "remainingBlockingDefects": [
+  {
+   "severity": "major",
+   "at": "3.80-4.02",
+   "problem": "The hero \"last bump melts\" is not a melt. tauBase is warped so the l=2/3 egg barely changes from about 3.3 to 3.8. snapTau then plunges from tau 0.08 to 1.6 over about 0.18 s (3.84 to 4.02), which is 4 to 5 frames. In the 3.8, 3.88, 3.94 and 3.98 frames the egg is a sphere by 3.94. The QA motion-spike and luminance-jump flags at t=4.0 to 4.5 (luma 32 to 75 to 112, diff about 45 against a median of 5.5) are partly the hero flash and partly this pop. The readout tau jumps by an order of magnitude in the same 0.15 s. It reads as a cut to a sphere, not as the shape relaxing.",
+   "fix": "Stretch the final relaxation. In snapTau change seg(t,3.84,4.02) to about seg(t,3.25,4.0) and lower the exponent from 2.4 to about 1.6. Reduce T_K so tauBase(3.5) is nearer 0.10 and the l=2/3 lobes visibly shrink through 3.3 to 4.0. Keep the flash, ring and shell on the HERO=4.0 hit."
+  }
+ ],
+ "authorKnownIssues": [
+  "Hero frames 4.0 to 4.3 are heavy: mean luma peaks at about 140/255, the rays cross the title and readout, and the exact 4.0 frame is hazy grey-lilac from bloom. qa.mjs flags motion-spike and luminance-jump only there (intentional).",
+  "Per-frame cost varies widely in shot.mjs (10 to 700 ms) because it includes webfont settling. The update work itself is about 15 ms while spikes are alive, and rendering is light. The tables use about 30 MB and take about 0.3 s in init.",
+  "∬K dA is computed as the signed area of the Gauss-map image of the analytic vertex normals. It is a real computation but nearly topological, so it reads 12.566 at every instant. The plain K·dA quadrature only reached 12.23 at needle-sharp spikes on the 160x80 mesh, so I did not display it.",
+  "The flow is the storyboard's spectral decay of the radial profile (a_lm e^(-l(l+1)τ)), not a true intrinsic Ricci flow; the readout header says 'FLOW τ'. Volume is not renormalised, and the blob relaxes to the unit sphere.",
+  "The Poincaré loop and the two great circles cross each other on the sphere between about 5.7 and 7.5. They can look like a tangle of glow lines, and the loop reads as a bean shape during the contraction.",
+  "The long lower spike of the initial urchin comes close to caption 1 around t=2.2 to 2.5. The camera was raised to clear it, but the spike tip still brushes the caption edge in some frames.",
+  "During the cascade, the sonar rings are drawn behind the title text and cross the sphere front. Some viewers may find the Saturn-ring look too heavy.",
+  "Engine quirk: ui.path/rect/line created for the first time with opacity 0 stay visible in default black (never styled), which shows up when seeking straight to a time past a fade-out. I guard against it with an opacity check before calling, but other scenes may hit it."
+ ],
+ "engineRequests": [
+  "ui._sstyle: when an SVG shape is first created with opacity <= 0.001, set display:none (currently it stays visible with default black fill).",
+  "Optional: a post.flashCenter or radial flash parameter, because a global additive flash of even 0.06 lifts the whole frame to visible grey; a radial flash would give hero hits without the veil.",
+  "Optional: expose a cheap kit.surfaceMaterial hook for extra fragment code (I patched fragmentShader by string replace to add the surface wave band)."
+ ],
+ "perfMs": 60
+}

@@ -1,5 +1,6 @@
 // Shared visual kit: everything that must look IDENTICAL across scenes lives here (backdrop, stars, hero surface material, arrows, titles, captions).
 import * as THREE from 'three';
+import katex from 'katex';
 import { GLSL, palette, clamp, lerp, ease, seg, pulse, smoothstep, rng, fbm3, TAU, css } from './util.js';
 
 // ============================================================================================================ 3D pieces
@@ -88,7 +89,7 @@ export function surfaceMaterial(o = {}) {
         col += base*uEmis;
         vec2 gp = vUv*uGrid; vec2 gd = abs(fract(gp-0.5)-0.5)/max(fwidth(gp), vec2(1e-4)); float gl = 1.0 - min(min(gd.x,gd.y)/max(uGridW,0.01), 1.0);
         col += uGridCol*uGridI*gl*gl*(0.35+0.65*(0.4+fr));
-        if(uLevels > 0.5){ float lk = kn*uLevels; float ld = abs(fract(lk-0.5)-0.5)/max(fwidth(lk),1e-4); float lc = 1.0 - min(ld/1.2,1.0); col += vec3(1.0,0.96,0.85)*uLevelI*lc; }
+        if(uLevels > 0.5){ float kr = vK*uKScale; float lk = kr*uLevels; float fw = fwidth(lk); float ld = abs(fract(lk-0.5)-0.5)/max(fw,1e-4); float lc = (1.0 - min(ld/1.2,1.0)) * step(1e-3, fw) * (1.0 - smoothstep(0.92, 1.0, abs(kr))); col += vec3(1.0,0.96,0.85)*uLevelI*lc; }
         float edgeGlow = smoothstep(0.035, 0.0, e) * step(e, 0.06) * step(uReveal, 1.0) + smoothstep(0.035,0.0,ev)*step(uRevealV,1.0);
         col += vec3(0.6,0.9,1.0)*edgeGlow*5.0;
         gl_FragColor = vec4(col, uAlpha);
@@ -109,7 +110,8 @@ export function arrow(ctx, { color = palette.gold, width = 4, head = 0.09, inten
     d.set(dir[0], dir[1], dir[2]).normalize();
     const tip = [from[0] + d.x * len, from[1] + d.y * len, from[2] + d.z * len];
     const base = [from[0] + d.x * (len - head * 0.9), from[1] + d.y * (len - head * 0.9), from[2] + d.z * (len - head * 0.9)];
-    shaft.geometry.setPositions([...from, ...base]);
+    const buf = shaft.geometry.attributes.instanceStart.data;   // in-place: no per-frame allocation
+    buf.array[0] = from[0]; buf.array[1] = from[1]; buf.array[2] = from[2]; buf.array[3] = base[0]; buf.array[4] = base[1]; buf.array[5] = base[2]; buf.needsUpdate = true;
     cone.position.set(tip[0] - d.x * head * 0.75, tip[1] - d.y * head * 0.75, tip[2] - d.z * head * 0.75);
     q.setFromUnitVectors(up, d); cone.quaternion.copy(q);
     g.visible = len > 1e-4;
@@ -157,4 +159,12 @@ export function formula(ui, t, key, latex, { at = 0, dur = 99, x = 960, y = 540,
   if (v <= 0.001) return 0;
   ui.tex(key, latex, { x, y, size, anchor, color, glow, display, opacity: v, reveal: seg(t, at, at + fi + 0.5, ease.linear), revealMode: 'mask' });
   return v;
+}
+
+/** Inline KaTeX for use INSIDE ui.text html (e.g. `曲率 ${kit.math('\\kappa')} 与挠率 ${kit.math('\\tau')}`): proper mathematical Greek, never mistaken for K/T. */
+const _mc = new Map();
+export function math(latex) {
+  let h = _mc.get(latex);
+  if (!h) { h = katex.renderToString(latex, { throwOnError: false, strict: false, output: 'html' }); _mc.set(latex, h); }
+  return h;
 }

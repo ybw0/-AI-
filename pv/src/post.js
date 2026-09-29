@@ -16,7 +16,7 @@ export const POST_DEFAULTS = {
   vignette: 0.5,
   ca: 0.0016,             // chromatic aberration (radial)
   grain: 0.03,
-  flash: 0,               // additive white (HDR) - for hits
+  flash: 0,               // hit flash: 0.1-0.3 punchy, 0.5-0.8 heavy, >=0.9 pure white. Implemented as bloom swell + exposure surge (bright things blow out, dark stays dark) - NOT a flat add
 };
 export const TRANSITIONS = { fade: 0, flash: 1, iris: 2, glitch: 3, zoom: 4, dip: 5 };
 
@@ -140,12 +140,17 @@ const F_GRADE = /* glsl */ `
     vec2 c = vUv - 0.5; float r2 = dot(c*vec2(aspect,1.), c*vec2(aspect,1.));
     vec2 off = c*ca*(1.0+r2*2.0);
     vec3 col = vec3(texture2D(tScene, vUv+off).r, texture2D(tScene, vUv).g, texture2D(tScene, vUv-off).b);
-    col += texture2D(tBloom, vUv).rgb * bloomStr;
-    col += texture2D(tStreak, vUv).rgb * streakColor * streakStr;
-    col *= exposure * tint;
+    float fl = max(flash, 0.0);
+    col += texture2D(tBloom, vUv).rgb * bloomStr * (1.0 + fl*10.0);
+    col += texture2D(tStreak, vUv).rgb * streakColor * streakStr * (1.0 + fl*6.0);
+    col *= exposure * tint * (1.0 + fl*fl*24.0);
     col *= 1.0 - vignette * smoothstep(0.15, 0.95, r2*1.6);
-    col += vec3(1.0,0.97,0.92)*flash;
+    // HIT FLASH (applied above: bloom/streak swell + exposure surge). Only a whisper of radial light is added here, because a flat
+    // linear add lifts black to visible grey (sRGB curve) and reads as fog. The last stretch blends to pure white.
+    float rad = 1.0 - smoothstep(0.0, 1.15, length(c*vec2(aspect,1.)));
+    col += vec3(1.0,0.97,0.92) * fl*fl * 0.35 * rad*rad;
     col = aces(col);
+    col = mix(col, vec3(1.0,0.985,0.96), smoothstep(0.88, 1.0, fl));
     col = toSRGB(col);
     col = (col-0.5)*contrast + 0.5;
     float l = luma(col); col = mix(vec3(l), col, saturation);

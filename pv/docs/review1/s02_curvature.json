@@ -1,0 +1,55 @@
+{
+ "id": "s02_curvature",
+ "finalScores": {
+  "impact": 3.5,
+  "clarity": 3.5,
+  "typography": 3.5,
+  "motion": 4,
+  "look": 3.5,
+  "technical": 4.5,
+  "math": 4.5
+ },
+ "finalPass": false,
+ "remainingBlockingDefects": [
+  {
+   "severity": "major",
+   "at": "6.0 to 6.4",
+   "problem": "The hero hit is underpowered. At t=6.0 the torus is still a translucent ghost wireframe; the heat map only appears as a thin wedge with a clipped-white slab at the reveal front (about x 810 to 1000, y 350 to 450 at 6.15). That slab reads as a blown-out block, not a glowing front. There is no full-frame surge, because heroF=0 and flash is removed, and mean luma peaks at only about 72. The anamorphic streak and the orange horizon arc cross behind the title lock-up (y about 350 to 420) and add clutter.",
+   "fix": "Make the sweep front a thin bright line: reduce the edge-glow term (kit shader edgeGlow x5) by scaling the surface's colour before the edge, or narrow `hot`'s reveal so the front is not a fat white band. Ramp `hot` faster (HERO-0.08 to HERO+0.5) and start the heat map from a visible sliver at t=HERO. Add a real but small punch: post.exposure 1.0 to 1.15 for about 4 frames on pulse(t,HERO,HERO+0.25), and raise post.bloom peak to 1.4. Lower post.streak at HERO so it does not bar the title (0.35 to about 0.2)."
+  },
+  {
+   "severity": "major",
+   "at": "10.0 to 11.3",
+   "problem": "The climax frame is overloaded and cramped. Four or five text groups are on screen at once: the formula, the K 不变 stamp with K UNCHANGED, the K=−0.5617 tag, and the zh and en captions. This breaks the 'max three text things' rule. The stamp top (y about 330) nearly touches the bottom of the formula (y about 300). K UNCHANGED (34 px) is tiny and low-contrast under the 132 px stamp. The K tag runs to x=1847 at t=10.5, outside the x≤1810 safe area, and its thin leader line crosses the bright grey-white part of the surface.",
+   "fix": "End the formula `ef` at 10.0 (dur 8.4 to 10.0 instead of 2.9), so the stamp owns the top-left. Move the stamp down (y 300 to about 380). Raise K UNCHANGED size 34 to about 44 and lighten it. Clamp the tag x with `tx = clamp(sp[0]+250, 700, 1500)` and `anchor:'bl'` so the right edge is at most 1780. Drop the tag leader opacity or offset it so it does not cross the milky patch."
+  },
+  {
+   "severity": "major",
+   "at": "10.3 to 12.0 (peak about 10.5, 11.0)",
+   "problem": "The helicoid mid-bend looks messy. Large pale grey-white milky patches (specular plus near-zero-K rim colour) sit on the right and lower flare, and a ghost translucent flap from the seam dissolve is visible around x 1400 to 1500, y 620 to 700 at t=10.5. The seam fade at u=U0±π reads as fog, not a clean edge. The shape reads as a crescent or fish, not 'catenoid bending into helicoid', and the low-K white contradicts 'violet = flat' and mutes the cyan K<0 identity.",
+   "fix": "In the local catMat fragment shader, cap the diffuse and spec so the low-|K| region stays tinted, for example base = mix(vec3(0.05,0.25,0.6), curvatureColor(kn), ...) and reduce uSpec 0.5 to about 0.2. Tighten the seam: use sw=mix(0.03,0.12,uSeam) and hard-discard sooner (seamF<0.08) so no translucent flap remains. Optionally rotate the camera azimuth (azN + 0.42 to about +0.2) so the open cut is further from view."
+  },
+  {
+   "severity": "major",
+   "at": "0.0 to 0.4",
+   "problem": "The opening frame is murky and sparse. At t=0 the frame is a brown-grey haze from the sun sprite plus nebula (scale 10, colour 0.3), with three tiny patches and a faint pale ring0. The composition has no focal point. It reads as low-contrast fog after the white flash, not a wow. The saddle is only a small cyan teardrop.",
+   "fix": "Increase the patch reveal at t=0 (rev start -0.4 to about -0.9 so the saddle is already large). Cut the sun sprite at t<1 from 0.3*exp(-t*5) to about 0.15 and warm-tint it, or shrink its scale from 10 to about 6 so it does not fog the whole frame. Make ring0 crisper: uW 0.25 to about 0.12, uA 0.3 to about 0.6."
+  }
+ ],
+ "authorKnownIssues": [
+  "t=0 to about 0.4 s is a pale grey wash from the residual flash, bloom and opening shock ring. The incoming white-flash transition mostly hides it, but it is not a striking frame.",
+  "The hero flash at 6.0 to 6.07 is a deliberate near-white hit for about 2 frames. qa.mjs flags it as a motion-spike and luminance-jump; there is a smaller flag around 8.25 where the torus swaps to the ring and the catenoid.",
+  "Act A is diagram-like. The Gauss-map flash from the storyboard was not implemented.",
+  "Text density is high in 3.1–5: title, formula, three patch labels (two lines each) and a caption, above the three-item guideline. Labels sit close to the caption and, at the dome, near the circle bottoms.",
+  "During the 10.0 swoop the K tag and caption sit over bright cyan surface. The scrim and text shadows help, but legibility is only moderate. The tracked-point ring is small until the camera is face-on.",
+  "At θ near π/2 the open helical seam of the catenoid shows as a small notch at the top edge. The torus collapse briefly shows saturated red where K blows up.",
+  "The convergence stream at about 5.5 includes a couple of bright ring artefacts (sheet/saddle circles and beads while dissolving) that look slightly messy.",
+  "At 1080p the first frame is slow (1.5 s, shader compile); steady state is about 25–60 ms per frame, with the torus and catenoid geometry refills adding a little."
+ ],
+ "engineRequests": [
+  "kit.surfaceMaterial: the K iso-level lines draw a solid white plateau where kn is clamped to ±1 (fwidth 0 gives a huge lc). Worked around with a non-integer uLevels of 5.5 and kScale below 1, but the shader should guard it.",
+  "kit.surfaceMaterial has no per-fragment reveal-out or alpha-fade, which limited the patch-to-particle dissolve to uAlpha.",
+  "post.flash adds flat white, which reads as a grey wash on dark frames. A flash that lifts highlights only, or an additive bloom-only burst, would look better for hits."
+ ],
+ "perfMs": 35
+}

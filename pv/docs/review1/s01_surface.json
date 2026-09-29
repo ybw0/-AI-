@@ -1,0 +1,30 @@
+{
+ "id": "s01_surface",
+ "finalScores": {
+  "impact": 4,
+  "clarity": 4,
+  "typography": 4,
+  "motion": 4,
+  "look": 4,
+  "technical": 4,
+  "math": 5
+ },
+ "finalPass": true,
+ "remainingBlockingDefects": [],
+ "authorKnownIssues": [
+  "The frame at exactly t=5.0 is very bright: the blast sprite and bloom blow out the torus body for about 2-3 frames. This is intended as the hit, but a critic may find it too hot. qa.mjs flags motion-spike / luminance-jump at 5.0-5.5, all of them the hero.",
+  "Tangent plane and normal are only really legible at the front/top of the tube; later in the caption the marker sits on the far top edge and the plane is a faint parallelogram.",
+  "Comets on the curvature lines are readable at 1080p but subtle at 960x540; they are short bright dashes rather than long streaks.",
+  "The scene is quite blue and neon overall (backdrop nebula plus polar floor); the palette is on-brief but slightly less 'dark and restrained' than ideal.",
+  "The ring is hidden behind the torus for part of the sweep (camera only follows at ~46% of ring speed); the ring is only obvious at the start and near the end of the sweep.",
+  "The readout is 23 px mono, and the last hint line is small and low contrast. The formula block sits about 50 px from the torus's left edge at t=8-10.",
+  "Per-frame time varies 10-450 ms at 960x540 because the CPU is shared. The worst steady-state I saw was about 400 ms (hero and readout frames); this is close to the 400 ms budget.",
+  "Chapter title uses my own copy of kit.chapterTitle (English line offset), so it will differ slightly from other scenes."
+ ],
+ "engineRequests": [
+  "kit.surfaceMaterial: expose uniforms for base-colour brightness (curvature tint multiplier) and reveal-edge glow strength. I patched the fragment source with string replaces; edgeGlow's step(uReveal,1.0) pops when the reveal finishes.",
+  "kit.chapterTitle: the English line overlaps the CJK glyph descent with anchor 'tl' (y + size*1.02 is too tight); consider ~1.3*size.",
+  "post.flash is a flat additive white, which turns dark frames into gray fog; a screen-space radial/localized flash param would suit hero hits better."
+ ],
+ "perfMs": 300
+}

@@ -4,8 +4,8 @@
 import katex from 'katex';
 
 const FONTS = {
-  serif: `'Noto Serif SC', 'Cormorant Garamond', serif`,
-  en: `'Cormorant Garamond', 'Noto Serif SC', serif`,           // elegant italic/roman Latin
+  serif: `'Noto Serif SC', 'Noto Serif', 'Cormorant Garamond', serif`,   // Noto Serif supplies Greek (κ τ) that Noto Serif SC lacks
+  en: `'Cormorant Garamond', 'Noto Serif', 'Noto Serif SC', serif`,           // elegant italic/roman Latin
   sans: `'Inter', 'Noto Serif SC', sans-serif`,
   mono: `'JetBrains Mono', 'Noto Serif SC', monospace`,
 };

@@ -1,0 +1,43 @@
+{
+ "id": "s03_geodesic",
+ "finalScores": {
+  "impact": 4,
+  "clarity": 3.5,
+  "typography": 4,
+  "motion": 4,
+  "look": 4,
+  "technical": 4,
+  "math": 3.5
+ },
+ "finalPass": false,
+ "remainingBlockingDefects": [
+  {
+   "severity": "major",
+   "at": "9.05-10.5",
+   "problem": "The readout contradicts the picture. From 9.05 to 9.95 it counts 'Δθ = 48.6° = ∬K dA = 0.8483 rad' while the white and magenta vectors at A are already 90° apart (transport finished at ~8.95). The label 'Δθ' is really the swept area, driven by the same `sweep` clock, so the holonomy angle and the area integral look unrelated mid-sweep. A mathematician would flag this.",
+   "fix": "Show the two quantities separately. Print the fixed 'Δθ = 90.0°' from t≈8.95 (its own line, no counting). Label the counting line as 'swept ∬K dA = …' or 'area swept = … rad'. Count it up with `sweep` and have the gold arc and patch land on 90° at the same time. Alternatively rotate a live vector from white to magenta with `sweep` instead of showing the finished magenta arrow early."
+  },
+  {
+   "severity": "major",
+   "at": "8.4-10.5",
+   "problem": "The loop is hard to read as a triangle. The view puts B and C near the limb, so the B–C leg sits edge-on and the right-angle marks at B and C are foreshortened. The `vFacing(...,0.3,0.5)` filter hides about half the ghost arrows, leaving 4 to 5 visible. Some ghost tips stick out past the sphere silhouette (about (430,515) at 9.5). Only the white-to-magenta pair at A carries the payoff. The sweep front is a wide, muddy beige smear across the sphere at 9.3-9.6.",
+   "fix": "Retune the FOCUS pose (`this.q1`, `pose(36)`) and `camPose` (r about 7.8, el 0.34) so all three vertices sit inside the visible cap, for example around 45° off-axis. Loosen the `vFacing` thresholds for ghosts (0.3/0.5 to about 0.1/0.25) and shorten `arrowLen` (0.56 to about 0.42) so tips stay near the surface. Narrow `halo` and `edge` in `patchFS` (halo 0.08 to about 0.03, width 0.12 to about 0.06) to remove the smear."
+  }
+ ],
+ "authorKnownIssues": [
+  "Per-frame timing from shot.mjs is bimodal (about 10–30 ms versus 500–1200 ms) because the software GL queue flushes in bursts and the machine is shared. The average is about 250 ms, but dense-fan frames (t=6–9) may occasionally exceed 400 ms. The heaviest parts are the two additive passes over about 26k instanced segments and the roughly 460 dust points.",
+  "The hero-frame flash is deliberately tiny (0.025). Larger values washed the whole frame grey, so the hit relies on bloom, the streak and the geodesic circle instead.",
+  "Vertex A of the octant sits near the sphere limb, so the rotation arc and the initial and final arrows are a bit cramped. No A/B/C letter labels are drawn, to respect the three-text-item limit.",
+  "At t=0 the torus close-up is dark and simple. The point P is visible but small, so the incoming iris transition shows a quiet frame rather than a spectacular one.",
+  "The floor shockwave ring and the 5-unit floor lattice are still somewhat soft and murky under bloom.",
+  "The Δθ count-up is an eased display animation. The final 90.0° value is genuinely computed from the transported vector, but the intermediate values are not physical.",
+  "The torus caption and the title fade during the camera truck (6.2–8.2), so the torus phase has no on-screen text for about half a second at the handover.",
+  "The scene was checked with contact sheets at t=0 to 11 and full-resolution frames at 0, 5.6 and 10, plus qa.mjs. The only QA flags are the intended hero luminance spike at t=5.0 and motion spikes during the camera truck at 7.1–7.5."
+ ],
+ "engineRequests": [
+  "kit.surfaceMaterial's reveal edge glow (x5) is too harsh for a sphere-birth sweep, so I used scale-in plus alpha instead. A uEdgeGlow uniform would help.",
+  "post.flash appears to be strongly amplified (0.09 already greys the whole frame). Documenting its effective range would help authors.",
+  "The engine could expose an optional depth-tested screen-space instanced-segment line primitive with per-segment attributes (like s03_geodesic_lines.js), so scenes can grow many lines with one instanceCount."
+ ],
+ "perfMs": 250
+}
